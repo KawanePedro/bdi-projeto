@@ -1,24 +1,28 @@
 CREATE EXTENSION IF NOT EXISTS btree_gist;
 
 CREATE TYPE status_reserva AS ENUM ('ATIVA', 'CANCELADA', 'CONCLUIDA');
+CREATE TYPE tipo_usuario AS ENUM ('ALUNO', 'PROFESSOR', 'SERVIDOR');
+CREATE TYPE tipo_sala AS ENUM ('SALA', 'LABORATORIO');
 
 CREATE TABLE usuario (
   id SERIAL PRIMARY KEY,
   nome TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
-  tipo TEXT NOT NULL CHECK (tipo IN ('ALUNO','PROFESSOR','SERVIDOR'))
+  tipo tipo_usuario NOT NULL
 );
 
 CREATE TABLE sala (
   id SERIAL PRIMARY KEY,
   nome TEXT NOT NULL UNIQUE,
-  tipo TEXT NOT NULL CHECK (tipo IN ('SALA','LABORATORIO')),
-  capacidade INT NOT NULL CHECK (capacidade > 0)
+  tipo tipo_sala NOT NULL,
+  capacidade INT NOT NULL CHECK (capacidade > 0),
+  localizacao TEXT
 );
 
 CREATE TABLE recurso (
   id SERIAL PRIMARY KEY,
-  nome TEXT NOT NULL UNIQUE
+  nome TEXT NOT NULL UNIQUE,
+  descricao TEXT
 );
 
 CREATE TABLE sala_recurso (
@@ -43,7 +47,7 @@ CREATE TABLE reserva (
 
 CREATE TABLE log_reserva (
   id BIGSERIAL PRIMARY KEY,
-  reserva_id INT NOT NULL, 
+  reserva_id INT NOT NULL, -- sem FK pois o log sobrevive a delete
   operacao TEXT NOT NULL,
   dados_antigos JSONB,
   dados_novos JSONB,
